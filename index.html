@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Migration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .form-column {
+            flex: 1;
+            padding: 10px;
+        }
+        .form-column:not(:last-child) {
+            margin-right: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #loading {
+            text-align: center;
+            font-size: 16px;
+            color: #007BFF;
+        }
+        #result, #progress-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #progress-container {
+            width: 100%;
+            background-color: #f4f4f4;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        #progress-bar {
+            width: 0;
+            height: 20px;
+            background-color: #007BFF;
+            transition: width 0.4s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IMAP Email Migration</h1>
+        <form id="migration-form" method="post" action="migrate.php">
+            <div class="form-row">
+                <div class="form-column">
+                    <h2>Source Server</h2>
+                    <label for="source-server">Server:</label>
+                    <input type="text" id="source-server" name="source[server]" required>
+                    <label for="source-user">User:</label>
+                    <input type="text" id="source-user" name="source[user]" required>
+                    <label for="source-password">Password:</label>
+                    <input type="password" id="source-password" name="source[password]" required>
+                </div>
+                <div class="form-column">
+                    <h2>Destination Server</h2>
+                    <label for="dest-server">Server:</label>
+                    <input type="text" id="dest-server" name="destination[server]" required>
+                    <label for="dest-user">User:</label>
+                    <input type="text" id="dest-user" name="destination[user]" required>
+                    <label for="dest-password">Password:</label>
+                    <input type="password" id="dest-password" name="destination[password]" required>
+                </div>
+            </div>
+            <button type="submit">Migrate</button>
+        </form>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <p id="loading" style="display:none;">Migration in progress...</p>
+        <p id="result"></p>
+    </div>
+    <script>
+        document.getElementById('migration-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').innerText = '';
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = '0%';
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('migrate.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const text = await response.text(); // Read response as text
+                console.log('Raw response:', text); // Log the raw response
+
+                try {
+                    const result = JSON.parse(text); // Try to parse it as JSON
+                    document.getElementById('result').innerText = result.message;
+
+                    // Simulate progress bar
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 10;
+                        progressBar.style.width = progress + '%';
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                        }
+                    }, 200);
+                } catch (e) {
+                    document.getElementById('result').innerText = 'Invalid JSON response: ' + text;
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = 'An error occurred: ' + error.message;
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
