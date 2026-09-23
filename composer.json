@@ -2,7 +2,7 @@
     "name": "hosthobbit/imap-migrate",
     "description": "Copy a mailbox from one IMAP server to another through a simple web form",
     "type": "project",
-    "license": "proprietary",
+    "license": "MIT",
     "require": {
         "php": ">=7.4",
         "ext-imap": "*",

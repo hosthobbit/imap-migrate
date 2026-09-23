@@ -43,6 +43,10 @@ This form accepts mailbox passwords and connects to whatever server it's given. 
 
 For large or multi-account migrations, Host Hobbit can run them for you. See below.
 
+## License
+
+MIT, see [LICENSE](LICENSE).
+
 ---
 
 ## About Host Hobbit
