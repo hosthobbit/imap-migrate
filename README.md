@@ -1,70 +1,52 @@
-# IMAP Email Migration Tool
+# IMAP Migrate
 
-This tool allows you to migrate emails from one IMAP server to another. It provides a simple web interface for users to input the source and destination server details and perform the migration with a progress indicator.
+A lightweight PHP tool for moving a mailbox from one IMAP server to another, built by Host Hobbit for client email migrations.
 
-## Features
+Enter the source and destination mailbox details in a web form and every message in the source inbox is copied across, **byte for byte**, keeping:
 
-- Migrate emails from a source IMAP server to a destination IMAP server.
-- Simple web interface for inputting server details.
-- Progress bar to indicate the migration progress.
+- attachments and HTML formatting (messages are copied raw, not rebuilt)
+- each message's original received date, so the new inbox sorts correctly
+- read / unread status
 
-## Prerequisites
+## Requirements
 
-- PHP 7.2 or higher
-- Composer
+- PHP 7.4 or newer with the `imap` extension enabled
+- [Composer](https://getcomposer.org/)
+- Both servers reachable over IMAP with SSL on port 993
 
 ## Installation
 
-1. **Clone the repository:**
-
-   ```bash
-   git clone https://github.com/hosthobbit/imap-migrate.git
-   cd imap-migrate
-Install Composer dependencies:
-
-Make sure you have Composer installed. Then run:
-
-bash
-Copy code
+```bash
+git clone https://github.com/hosthobbit/imap-migrate.git
+cd imap-migrate
 composer install
-Deploy the files to your web server:
+```
 
-Ensure the following files and directories are deployed to your web server:
+Then upload the folder (including `vendor/`) to a PHP-enabled web server.
 
-migrate.php
-index.html
-composer.json
-composer.lock
-vendor directory
-Usage
-Open the index.html file in your web browser by navigating to the appropriate URL (e.g., http://yourdomain.com/migrate/index.html).
+## Usage
 
-Fill in the source and destination server details:
+1. Open `index.html` in a browser, for example `https://yourdomain.com/imap-migrate/`.
+2. Fill in the **source** server, username and password.
+3. Fill in the **destination** server, username and password.
+4. Click **Migrate**. The result is shown when the copy finishes.
 
-Source Server:
-Server: The IMAP server address of the source email server.
-User: The username for the source email account.
-Password: The password for the source email account.
-Destination Server:
-Server: The IMAP server address of the destination email server.
-User: The username for the destination email account.
-Password: The password for the destination email account.
-Click the "Migrate" button to start the migration process. The progress bar will indicate the migration progress, and the result will be displayed upon completion.
+## Security
 
-Example Directory Structure
-Your project directory should look something like this:
+This form accepts mailbox passwords and connects to whatever server it's given. **Don't leave it publicly accessible.** Protect the folder with HTTP authentication or an IP allow-list, always serve it over HTTPS, and remove it from the server when the migration is done.
 
-csharp
-Copy code
-imap-migrate/
-├── migrate.php
-├── index.html
-├── composer.json
-├── composer.lock
-└── vendor/
-Contributing
-Contributions are welcome! Please submit a pull request or open an issue to discuss any changes.
+## Limitations
 
-License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+- Copies the **INBOX** folder only (not Sent, Drafts or custom folders).
+- Runs as a single web request, so very large mailboxes may hit PHP's `max_execution_time`; raise it or migrate in batches.
+- The progress bar is indicative only; it doesn't track individual messages.
 
+For large or multi-account migrations, Host Hobbit can run them for you. See below.
+
+---
+
+## About Host Hobbit
+
+Built and maintained by **[Host Hobbit Ltd](https://hosthobbit.com)**: managed WordPress hosting, WHM/cPanel and VPS administration, security hardening and AI automation for businesses in the UK.
+
+Need help deploying this, or want something similar built for your business? [Get in touch](https://hosthobbit.com).

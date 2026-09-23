@@ -1,6 +1,9 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Errors go to the server log, never the page: a stack trace here would echo
+// server paths (and potentially IMAP details) back to whoever posted the form.
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
 require __DIR__ . '/vendor/autoload.php'; // Ensure the path is correct
@@ -32,18 +35,23 @@ function migrate_emails($sourceDetails, $destinationDetails) {
         }
 
         foreach ($mailsIds as $mailId) {
-            $mail = $sourceMailbox->getMail($mailId);
+            // Copy the message byte for byte. Rebuilding it from its decoded
+            // text/HTML parts dropped attachments and broke multipart mail.
+            $rawMessage = $sourceMailbox->getRawMail($mailId, false);
 
-            $headers = $mail->headersRaw;
-            $body = $mail->textPlain . "\r\n" . $mail->textHtml;
-            $fullMessage = $headers . "\r\n\r\n" . $body;
+            // Keep the original received date and read/unread state, so the
+            // destination inbox sorts and looks the same as the source.
+            $info = $sourceMailbox->getMailsInfo([$mailId]);
+            $flags = (!empty($info[0]->seen)) ? "\\Seen" : null;
+            $timestamp = isset($info[0]->date) ? strtotime($info[0]->date) : false;
+            $internalDate = $timestamp ? date('d-M-Y H:i:s O', $timestamp) : null;
 
             $result = imap_append(
-                $destinationImap, 
-                "{" . $destinationDetails['server'] . ":993/imap/ssl}INBOX", 
-                $fullMessage, 
-                "\\Seen", 
-                $mail->date
+                $destinationImap,
+                "{" . $destinationDetails['server'] . ":993/imap/ssl}INBOX",
+                $rawMessage,
+                $flags,
+                $internalDate
             );
 
             if (!$result) {
